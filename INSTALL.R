@@ -14,4 +14,5 @@ install.packages(c("babynames",
                    "gganimate",
                    "gifski",
                    "transformr",
+                   "png",
                    "gghighlight")) 
