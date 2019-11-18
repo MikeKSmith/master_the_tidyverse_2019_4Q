@@ -1,0 +1,260 @@
+---
+title: "ggplot2 Tips and Tricks and Extensions"
+author: "Mike K Smith"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup}
+library(tidyverse)
+```
+
+```{r}
+plot1 <- mpg %>%
+  ggplot(mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth()
+
+plot1
+```
+
+### ggplot2 - Add titles, subtitles, captions, axes labels
+```{r}
+plot1 +
+  labs(title = "Highway mileage is inversely related to engine size",
+       subtitle = "Data: mpg",
+       x = "Engine size (L)",
+       y = "Highway mileage (mpg)",
+       caption = "Source: CP1:FI123456")
+```
+
+
+### ggplot2 - Using `%+%` to change the dataset
+```{r}
+mtcars2 <- mtcars %>%
+  rename(hwy = mpg,
+         displ = disp)
+
+plot2 <- plot1 %+%
+  mtcars2
+plot2
+```
+
+```{r}
+plot3 <- ggplot(data=mpg, mapping=aes(x = class, y = hwy)) +
+  geom_boxplot() +
+  coord_flip()
+plot3
+
+plot4 <- ggplot(mpg) + 
+  geom_bar(aes(class,fill=class)) +
+  coord_flip()
+plot4
+```
+
+
+## patchwork - arrange multiple plots
+
+```{r}
+library(patchwork)
+plot3 + plot4 + plot_annotation(title = "mpg data exploration", 
+                                tag_levels="a", tag_suffix = ")")
+
+plot3 + plot4 - plot1 + plot_layout(ncol=1) + plot_annotation(title = "mpg data exploration", 
+                                                              tag_levels="i", tag_suffix = ")")
+```
+
+## cowplot - templates for publication ready plots
+```{r}
+library(cowplot)
+plot1 + 
+  labs(title="Highway mileage is inversely related to engine size", 
+       x = "Engine displacement (Litres)",
+       y = "Highway mileage (mpg)") +
+   theme_cowplot(font_size = 18)
+
+plot1 + 
+   theme_minimal_grid()
+
+plot1 + 
+   theme_minimal_hgrid()
+```
+
+### Adding annotations and text to plots
+```{r}
+ggdraw(plot1) + 
+  draw_label("Draft", color = "light grey", alpha=0.3, size = 100, angle = 45) 
+```
+
+### Using `stamp` to label plots
+```{r}
+stamp(plot1, label = "DRAFT", color = "red")
+```
+
+## ggrepel to label points without overlap
+```{r}
+library(ggrepel)
+
+plot_ugly <- ggplot(mtcars) + 
+  aes(
+    x = wt, y = mpg,
+    label = rownames(mtcars)
+  ) + 
+  geom_point(color = "red") +
+  geom_text()
+
+stamp_ugly(plot_ugly)
+
+ggplot(mtcars) + 
+  aes(
+    x = wt, y = mpg,
+    label = rownames(mtcars)
+  ) + 
+  geom_point(color = "red") +
+  geom_text_repel()
+```
+
+
+## gghighlight only certain observations
+```{r}
+library(gghighlight)
+
+plot4 + 
+  gghighlight(class == "suv")
+
+plot1 + 
+  gghighlight(class == "suv") 
+
+plot3 + 
+  gghighlight(class == "suv")
+```
+
+## ggridges to compare densities neatly
+```{r}
+library(ggridges)
+
+ggplot(data = mpg, mapping = aes(x = hwy, y = class)) +
+  geom_density_ridges()
+
+## Using fct_reorder from the `forcats` package to sort the factor
+## by the median of `hwy` within each class.
+ggplot(data = mpg, mapping = aes(x = hwy, y = fct_reorder(class, hwy))) +
+  geom_density_ridges()
+```
+
+## GGally - Quick exploratory data analysis
+```{r}
+library(GGally)
+
+mpg %>%
+  select(cty, hwy, displ) %>%
+  ggscatmat()
+
+mpg %>%
+  select(class, cty, hwy, displ) %>%
+  ggpairs()
+```
+
+## ggforce - additional geoms and extensions to ggplot2
+```{r}
+library(ggforce)
+p <- ggplot(mpg) +
+  geom_autopoint() +
+  facet_matrix(vars(drv:fl), layer.diag = 2, grid.y.diag = FALSE)
+p
+
+p + 
+  geom_autodensity(aes(colour = class, fill = class),
+                     alpha = 0.4)
+```
+
+## ggedit - manipulate plot objects
+### Remove plot layers
+```{r}
+library(ggedit)
+
+## remove loess smooth and replace with a linear regression line
+## NB: Uses %>% to pass in the plot object
+## Because resulting output is a ggplot2 object we can revert to "+".
+plot1 %>%
+  ggedit::remove_geom(geom = "smooth") + 
+  geom_smooth(method = "lm")
+```
+
+### ggedit - interactive editing of plot attributes
+```{r, eval = FALSE}
+ggedit(plot1)
+```
+
+## xgxr - Helper functions for plotting concentration data
+```{r}
+library(xgxr)
+
+ggplot(data = Theoph, mapping = aes(x = Time, y = conc, group = Subject)) +
+  geom_line() + 
+  xgx_scale_y_log10()
+```
+
+### xgx_stat_ci - stat_summary with additional options for CI type
+```{r}
+times <- c(0, 0.25, 0.5, 1, 1.5, 2, 3.5, 5, 7, 9, 12, 24)
+myTheoph <- Theoph %>%
+  mutate(NTPD = metrumrg::snap(Time, times))
+table(myTheoph$NTPD)
+
+theoPlot1 <- ggplot(data = myTheoph, aes(x = NTPD,y = conc)) +
+  geom_line(mapping = aes(group = Subject), alpha=0.2) + 
+  xgx_stat_ci(color = "red") + 
+  labs(y = "Concentration (ng/ml)") 
+theoPlot1
+
+theoPlot1 +
+  xgx_scale_y_log10()
+```
+
+
+## survminer - Plotting survival curves
+```{r}
+library(survival)
+library(survminer)
+fit <- survfit(Surv(time, status) ~ sex, data = lung)
+ggsurvplot(fit, data = lung)
+
+ggsurvplot(
+  fit, 
+  data = lung, 
+  size = 1,                 # change line size
+  palette = 
+    c("#E7B800", "#2E9FDF"),# custom color palettes
+  conf.int = TRUE,          # Add confidence interval
+  pval = TRUE,              # Add p-value
+  risk.table = TRUE,        # Add risk table
+  risk.table.col = "strata",# Risk table color by groups
+  legend.labs = 
+    c("Male", "Female"),    # Change legend labels
+  risk.table.height = 0.25, # Useful to change when you have multiple groups
+  ggtheme = theme_bw()      # Change ggplot2 theme
+)
+```
+
+
+## Save all ggplot2 objects to working directory
+
+```{r, eval=FALSE}
+plotObjects <- Filter( function(x) 'gg' %in% class( get(x) ), ls() )
+
+## Save plot objects individually
+sapply(plotObjects, function(x)saveRDS(object = get(x), file = paste0(x,".Rdata",sep="")))
+
+## reload individually
+# plot1 <- readRDS("plot1.Rdata")
+
+# Save all plots as one object
+# save(list = plotObjects, file = "plots.Rdata")
+
+## test reloading
+# remove(list = ls())
+# load("plots.Rdata")
+```
