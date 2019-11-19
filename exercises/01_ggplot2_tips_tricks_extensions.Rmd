@@ -11,6 +11,12 @@ output:
 library(tidyverse)
 ```
 
+## Resources
+Check out https://www.ggplot2-exts.org/ for a good review of ggplot2 
+extensions.
+
+## ggplot2 plots for use in examples
+
 ```{r}
 plot1 <- mpg %>%
   ggplot(mapping = aes(x = displ, y = hwy)) + 
@@ -44,15 +50,16 @@ plot2
 
 ```{r}
 plot3 <- ggplot(data=mpg, mapping=aes(x = class, y = hwy)) +
-  geom_boxplot() +
-  coord_flip()
+  geom_boxplot()
 plot3
 
 plot4 <- ggplot(mpg) + 
-  geom_bar(aes(class,fill=class)) +
-  coord_flip()
+  geom_bar(aes(class,fill=class)) 
 plot4
+```
 
+### Use `forcats` functions to sort factors by size of some variable
+```{r}
 plot5 <- mpg %>%
   group_by(class) %>%
   summarise(n = n()) %>%
@@ -70,10 +77,28 @@ plot5
 library(patchwork)
 plot3 + plot4 + plot_annotation(title = "mpg data exploration", 
                                 tag_levels="a", tag_suffix = ")")
+```
 
+### Combined many plots
+
+```{r}
 plot3 + plot4 - plot1 + plot_layout(ncol=1) + plot_annotation(title = "mpg data exploration", 
                                                               tag_levels="i", tag_suffix = ")")
 ```
+
+## Use Data Visualization best practice
+In the combined graph of `plot3 + plot4` above, there is a lot of repeated 
+information in the graphic (vehicle class, legends etc.). By flipping the 
+plot to be horizontal, we can show the boxplot with the bar chart and
+eliminate much of the redundant information.
+
+```{r}
+plot3b <- plot3 + coord_flip()
+plot4b <- plot4 + coord_flip() + theme(axis.title.y=element_blank(), axis.text.y=element_blank(), legend.position="none")
+
+plot3b + plot4b
+```
+
 
 ## cowplot - templates for publication ready plots
 ```{r}
@@ -158,10 +183,13 @@ ggplot(data = mpg, mapping = aes(x = hwy, y = fct_reorder(class, hwy))) +
 ```{r}
 library(GGally)
 
+## Continuous outcomes only can use the quicker `ggscatmat`
 mpg %>%
   select(cty, hwy, displ) %>%
   ggscatmat()
 
+## For more general use with both categorical and continuous variables
+## use ggpairs. Although function this is slower.
 mpg %>%
   select(class, cty, hwy, displ) %>%
   ggpairs()
@@ -170,14 +198,30 @@ mpg %>%
 ## ggforce - additional geoms and extensions to ggplot2
 ```{r}
 library(ggforce)
-p <- ggplot(mpg) +
-  geom_autopoint() +
-  facet_matrix(vars(drv:fl), layer.diag = 2, grid.y.diag = FALSE)
-p
 
-p + 
-  geom_autodensity(aes(colour = class, fill = class),
-                     alpha = 0.4)
+plot6 <- mpg %>%
+  ggplot(mapping = aes(x = displ, y = hwy, colour = class)) + 
+  geom_point() + 
+  geom_mark_ellipse(aes(fill=class))
+plot6
+
+## Zoom in on the 2seater class
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, colour = class)) + 
+  geom_point() + 
+  facet_zoom(class=="2seater")
+
+## Alternatively zoom by x-axis limits
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, colour = class)) + 
+  geom_point() + 
+  facet_zoom(xlim=c(1.5, 2.5)) 
+
+## Perhaps better using gghighlight
+plot6 +
+  gghighlight(class == "2seater", use_direct_label = FALSE)
+
+## Alternatively label the overlapping ellipses
+plot6 + 
+  geom_mark_ellipse(aes(label=class))
 ```
 
 ## ggedit - manipulate plot objects
@@ -244,9 +288,25 @@ ggsurvplot(
   risk.table.col = "strata",# Risk table color by groups
   legend.labs = 
     c("Male", "Female"),    # Change legend labels
-  risk.table.height = 0.25, # Useful to change when you have multiple groups
-  ggtheme = theme_bw()      # Change ggplot2 theme
+  risk.table.height = 0.25 # Useful to change when you have multiple groups
 )
+```
+
+## ggraph - Visualizing networks
+
+```{r}
+library(miniCRAN)
+library(ggraph)
+library(tidygraph)
+
+tidyverseDependencies <- makeDepGraph(pkg = "tidyverse") %>%
+  as_tbl_graph()
+
+ggraph(tidyverseDependencies, layout="kk") +
+  geom_node_point() +
+  geom_edge_link(aes(colour = type)) +
+  geom_node_text(aes(label = name),
+                 repel = TRUE)
 ```
 
 
