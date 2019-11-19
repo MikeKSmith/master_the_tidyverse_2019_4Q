@@ -15,4 +15,17 @@ install.packages(c("babynames",
                    "gifski",
                    "transformr",
                    "png",
-                   "gghighlight")) 
+                   "gghighlight",
+                   "devtools",
+                   "cowplot",
+                   "ggrepel",
+                   "ggridges",
+                   "ggforce",
+                   "ggedit",
+                   "xgxr",
+                   "survival",
+                   "survminer",
+                   "miniCRAN",
+                   "ggraph",
+                   "tidygraph"))
+devtools::install_github("thomasp85/patchwork")
