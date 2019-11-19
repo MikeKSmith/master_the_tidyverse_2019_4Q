@@ -29,3 +29,4 @@ install.packages(c("babynames",
                    "ggraph",
                    "tidygraph"))
 devtools::install_github("thomasp85/patchwork")
+devtools::install_github("metrumresearchgroup/metrumrg")
