@@ -52,6 +52,15 @@ plot4 <- ggplot(mpg) +
   geom_bar(aes(class,fill=class)) +
   coord_flip()
 plot4
+
+plot5 <- mpg %>%
+  group_by(class) %>%
+  summarise(n = n()) %>%
+  mutate(class = fct_reorder(class, n)) %>%
+  ggplot(mapping = aes(x = class,fill=class)) + 
+  geom_col(mapping = aes(y = n)) +
+  coord_flip()
+plot5
 ```
 
 
@@ -127,8 +136,9 @@ plot4 +
 plot1 + 
   gghighlight(class == "suv") 
 
-plot3 + 
-  gghighlight(class == "suv")
+plot5 + 
+  gghighlight(class == "suv") +
+  theme(legend.position="none")
 ```
 
 ## ggridges to compare densities neatly
