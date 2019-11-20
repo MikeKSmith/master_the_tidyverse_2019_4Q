@@ -7,6 +7,7 @@ output: html_notebook
 
 ```{r setup}
 library(tidyverse)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 ```
 
 ## Aims
@@ -33,7 +34,7 @@ to understand and digest the relevant information.
 Finally check out https://www.ggplot2-exts.org/ for a good review of ggplot2 
 extensions.
 
-# `ggplot2` tips and tricks
+# ggplot2 tips and tricks
 
 ## Creating `ggplot2` plots for use in examples
 
@@ -92,7 +93,7 @@ plot2 <- plot1 %+%
 plot2
 ```
 
-### Use `forcats` library functions to sort factors by size of some variable
+### Use forcats library functions to sort factors by size of some variable
 ```{r sort_categories_using_forcats}
 plot5 <- mpg %>%
   group_by(class) %>%
@@ -105,7 +106,7 @@ plot5
 ```
 
 
-## `patchwork` - arrange multiple plots
+## patchwork - arrange multiple plots
 The `patchwork` package (by Thomas Lin Pedersen - https://patchwork.data-imaginist.com/)
 allows the user to define how to combine graphs. The `+` operator here combines
 plots into a single plot object. `plot_annotation` then allows us to define
@@ -118,14 +119,35 @@ plot3 + plot4 + plot_annotation(title = "mpg data exploration",
                                 tag_levels="a", tag_suffix = ")")
 ```
 
-### Combined many plots
+## ggeasy - easy access to theme aspects
+
+The x-axis `class` variable names above look AWFUL when the plots are pulled
+into `patchwork`. I know that in `ggplot2` I can rotate the axes labels... but
+can I recall the specific theme settings?
+
+The `ggeasy` package (by Jonathan Carroll - https://jonocarroll.github.io/ggeasy/)
+provides quick access to tweak commonly used `ggplot2` theme settings.
+
+```{r ggeasy_peasy}
+library(ggeasy)
+plot3b <- plot3 +
+  easy_rotate_x_labels(side = "right")
+plot4b <- plot4 +
+  easy_rotate_x_labels(side = "right")
+
+plot3b + plot4b + plot_annotation(title = "mpg data exploration", 
+                                tag_levels="a", tag_suffix = ")")
+```
+
+
+## patchwork continued - Combining many plots
 Here we're using patchwork to produce a slightly more complex layout,
 combining `plot3` and `plot4` in one row, then `plot1` underneath. The `-`
 signifies that the combined `plot3 + plot4` are on the same level as `plot1`, 
 and `plot_layout` defines that there is one column. 
 
 ```{r patchwork_multiple_graphs2}
-plot3 + plot4 - plot1 + plot_layout(ncol=1) + plot_annotation(title = "mpg data exploration", 
+plot3b + plot4b - plot1 + plot_layout(ncol=1) + plot_annotation(title = "mpg data exploration", 
                                                               tag_levels="i", tag_suffix = ")")
 ```
 
@@ -135,15 +157,20 @@ information in the graphic (vehicle class, legends etc.). By flipping the
 plot to be horizontal, we can show the boxplot with the bar chart and
 eliminate much of the redundant information.
 
-```{r patchwork_multiple_graphs3}
-plot3b <- plot3 + coord_flip()
-plot4b <- plot4 + coord_flip() + theme(axis.title.y=element_blank(), axis.text.y=element_blank(), legend.position="none")
+Here we're also using the `ggeasy` functions `easy_remove_legend()` and 
+`easy_remove_y_axis()` to remove the extraneous information from `plot4c`.
 
-plot3b + plot4b
+```{r patchwork_multiple_graphs3}
+plot3c <- plot3 + coord_flip()
+plot4c <- plot4 + coord_flip() + 
+  easy_remove_legend() + 
+  easy_remove_y_axis()
+
+plot3c + plot4c
 ```
 
 
-## `cowplot` - templates for publication ready plots
+## cowplot - templates for publication ready plots
 The `cowplot` package (by Claus O. Wilke - https://wilkelab.org/cowplot/index.html)
 implements many of the standards and recommendations from his "Fundamentals of
 Data Visualization" book. It extends `ggplot2` with themes for publication,
@@ -184,7 +211,7 @@ above.
 stamp(plot1, label = "DRAFT", color = "red")
 ```
 
-## `ggrepel` to label points without overlap
+## ggrepel to label points without overlap
 The `ggrepel` package (by Kamil Slowikowsi - https://slowkow.com/ggrepel) has
 been developed to ensure that text labels in plots do not overlap each other,
 do not cover data points, nor fall outside of the plotting area. The method of 
@@ -213,7 +240,7 @@ ggplot(mtcars) +
 ```
 
 
-## `gghighlight` only certain observations
+## gghighlight - highlighting visualization items based on predicates
 `gghighlight` (by Hiroaki Yutani - https://yutannihilation.github.io/gghighlight/index.html)
 is a `ggplot2` extension which highlights `ggplot2` `geoms` that match a given 
 predicate.
@@ -237,7 +264,7 @@ plot5 +
   theme(legend.position="none")
 ```
 
-## `ggridges` to compare densities neatly
+## ggridges to compare densities neatly
 `ggridges` (by Claus O Wilke - https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html) 
 is a useful extension for plotting many densities, or other 
 ridgeline visualizations where you may wish to plot the ridges by a categorical 
@@ -261,7 +288,7 @@ ggplot(data = mpg, mapping = aes(x = hwy, y = fct_reorder(class, hwy))) +
   geom_density_ridges()
 ```
 
-## `GGally` - Quick exploratory data analysis
+## GGally - Quick exploratory data analysis
 `ggally` (by the GGobi Foundation - https://ggobi.github.io/ggally/) provides
 useful matrix plots of data and is really well suited to quick data visualization
 for exploratory data analysis. 
@@ -287,7 +314,7 @@ mpg %>%
   ggpairs()
 ```
 
-## `ggforce` - additional geoms and extensions to ggplot2
+## ggforce - additional geoms and extensions to ggplot2
 `ggforce` (by Thomas Lin Pedersen - https://ggforce.data-imaginist.com/)
 provides additional `geoms` and extensions to `ggplot2`.
 
@@ -325,7 +352,7 @@ ggplot(data = mpg, mapping = aes(x = displ, y = hwy, colour = class)) +
   facet_zoom(xlim=c(1.5, 2.5)) 
 ```
 
-## `ggedit` - manipulate plot objects
+## ggedit - manipulate plot objects
 `ggedit` (from Metrum Research Group - https://metrumresearchgroup.github.io/ggedit/)
 provides very useful functions for removing layers of a `ggplot2` visualization
 object. This can be useful when we want to track how plots were manipulated 
@@ -363,7 +390,7 @@ plot1d - geom_point() #LIFO
 plot1d - geom_point() - geom_point()
 ```
 
-### `ggedit` - interactive editing of plot attributes
+### ggedit - interactive editing of plot attributes
 Another useful part of `ggedit` is the Shiny application which can be used
 to interactively change `ggplot2` object layers and themes, then saving the 
 resulting object back to the environment.
@@ -372,7 +399,7 @@ resulting object back to the environment.
 ggedit(plot1)
 ```
 
-## `xgxr` - Helper functions for plotting concentration data
+## xgxr - Helper functions for plotting concentration data
 `xgxr` is a package developed by Novartis (http://opensource.nibr.com/xgx/) for
 exploratory data analysis, particularly in the field of pharmacokinetic and
 pharmacodynamic data. Here we are only scratching the surface of this package
@@ -386,7 +413,7 @@ ggplot(data = Theoph, mapping = aes(x = Time, y = conc, group = Subject)) +
   xgx_scale_y_log10()
 ```
 
-### `xgx_stat_ci` - stat_summary with additional options for CI type
+### xgx_stat_ci - stat_summary with additional options for CI type
 The `xgx_stat_ci` is very similar to functionality in the `stat_summary` geom
 (https://ggplot2.tidyverse.org/reference/stat_summary.html) but it extends 
 this to allow the user to specify the confidence region width and the distribution
