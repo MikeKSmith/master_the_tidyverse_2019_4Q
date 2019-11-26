@@ -44,10 +44,12 @@ On a sheet of paper, draw how the cases data set would look if it had the same v
 
 ## Your Turn 2
 
-Use `gather()` to reorganize `table4a` into three columns: **country**, **year**, and **cases**.
+Use `pivot_longer()` to reorganize `table4a` into three columns: **country**, **year**, and **cases**.
 
 ```{r}
-
+table4a %>%
+  pivot_longer(cols= , 
+               names_to = "  ", values_to = "  ")
 ```
 
 ## Your Turn 3
@@ -56,18 +58,21 @@ On a sheet of paper, draw how this data set would look if it had the same values
 
 ## Your Turn 4
 
-Use `spread()` to reorganize `table2` into four columns: **country**, **year**, **cases**, and **population**.
+Use `pivot_wider()` to reorganize `table2` into four columns: **country**, **year**, **cases**, and **population**.
 
 ```{r}
-
+table2 %>%
+  pivot_wider(names_from =  , values_from =  )
 ```
 
 ## Your Turn 5
 
-Gather the 5th through 60th columns of `who` into a key column: value column pair named **codes** and **n**. Then select just the `county`, `year`, `codes` and `n` variables.
+Pivot the 5th through 60th columns of `who` into a key column: value column pair named **codes** and **n**. Then select just the `county`, `year`, `codes` and `n` variables.
 
 ```{r}
-
+who %>%
+  pivot_longer(cols =  , names_to =  , values_to = ) %>%
+  select( )
 ```
 
 ## Your Turn 6
@@ -75,6 +80,12 @@ Gather the 5th through 60th columns of `who` into a key column: value column pai
 Separate the `sexage` column into **sex** and **age** columns.
 
 ```{r}
+who %>%
+ pivot_longer(cols =  , names_to=  , values_to=  ) %>%  
+ select(  ) %>%
+ separate(codes, c(  ), sep = "_") %>%
+ select(  ) %>%
+ separate(  , into = c(  ), sep = )
 
 ```
 

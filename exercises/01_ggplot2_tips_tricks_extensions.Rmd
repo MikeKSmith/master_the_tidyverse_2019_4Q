@@ -439,6 +439,25 @@ theoPlot1 +
   xgx_scale_y_log10()
 ```
 
+### xgx_scale_x_time_units - time units for x-axis scale
+
+`xgxr` also has a useful function for working with time units on the x-axis.
+The function `xgx_scale_x_time_units` produces a label but also works out tick
+marks for the scale that are sensible given the units chosen.
+
+```{r}
+theoPlot1 +
+   xgx_scale_x_time_units(units_dataset = "h", units_plot = "h")
+```
+
+### xgx_annotate_status_png - overlay .png files with "DRAFT" status
+
+```{r, fig.width = 80%}
+ggsave(plot = theoPlot1, filename = "Theoph_profiles.png")
+xgx_annotate_status_png(file_or_dir = "Theoph_profiles.png")
+knitr::include_graphics("Theoph_profiles.png")
+```
+
 
 ## survminer - Plotting survival curves
 We're now going to look at particular cases where the visualization of 
