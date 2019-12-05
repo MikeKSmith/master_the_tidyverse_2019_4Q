@@ -6,7 +6,7 @@ output: html_notebook
 ```{r setup}
 library(tidyverse)
 library(babynames)
-library(nycflights13)
+#library(nycflights13)
 library(stringr)
 library(forcats)
 library(lubridate)
@@ -30,34 +30,66 @@ Finally, create a summary table that shows:
 
 
 ## Your Turn 2
+In the next few examples we're going to clean up a vector of treatment labels.
+Let's first read the data so we can see what we're going to work with:
+```{r}
+myTrts <- readRDS("Treatment_label_example.rds")
+myTrts
+```
 
-In your group, fill in the blanks to:
+We (humans) can see that "examplumab" is equivalent to "EXAMPLUMAB" and that 
+maybe "Egmb" is a contraction of that treatment, but R cannot. There is also
+quite a lot of dosing information that we should probably tidy so that we 
+can extract information like the total daily dose.
 
-1. Isolate the last letter of every name and create a logical variable that displays whether the last letter is one of "a", "e", "i", "o", "u", or "y".  
-2. Use a weighted mean to calculate the proportion of children whose name ends in a vowel (by `year` and `sex`)   
-3. and then display the results as a line plot.
+When cleaning character strings, it's easier to do many steps cleaning one thing
+at a time, rather than try to do it all at once. Use the functions below to 
+clean up the treatment information above, checking at each stage that you have
+extracted the information you expect.
+
+Try to answer this question: How many distinct treatments are there?
 
 ```{r}
-babynames %>%
-  _______(last = _________, 
-          vowel = __________) %>%
-  group_by(__________) %>%
-  _________(p_vowel = weighted.mean(vowel, n)) %>%
-  _________ +
-  __________
+str_sub( start = , end = )
+str_detect(pattern = )
+word(start =  , end =  , sep = " ")
+str_extract(pattern = )
+str_replace(pattern =  , replacement =  )
+str_replace_all(pattern =  , replacement =  )
+str_subset(pattern = )
+
+myTrts <- myTrts %>%
+```
+
+## Your Turn 2 and a bit
+
+Use regular expressions to subset out the treatment doses that have decimal places.
+(HINT: regex pattern \\d finds numeric values. Regex `+` 
+
+But see also 
+https://stringr.tidyverse.org/articles/regular-expressions.html) 
+
+```{r}
+str_subset(myTrts, pattern = "")
+
+myTrts %>%
+  str_subset(pattern = "")
 ```
 
 ## Your Turn 3
 
-Repeat the previous exercise, some of whose code is below, to make a sensible graph of average TV consumption by marital status.
+Make a sensible graph of average TV consumption by marital status using the 
+functions below and code template used in the slides for the `relig` factor.
 
 ```{r}
+drop_na( ) %>%
+group_by( ) %>%
+summarise( ) %>%
+
 gss_cat %>%
-  drop_na(________) %>%
-  group_by(________) %>%
-  summarise(_________________) %>%
-  ggplot() +
-    geom_point(mapping = aes(x = _______, y = _________________________))
+  
+  ggplot(aes(tvhours, fct_reorder(marital, tvhours))) +
+    geom_point()
 ```
 
 ## Your Turn 4
