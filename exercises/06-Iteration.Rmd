@@ -5,9 +5,6 @@ output: html_notebook
 
 ```{r setup}
 library(tidyverse)
-if("maps" %in% (.packages())){        # maps, loaded in lesson 4 
-  detach("package:maps", unload=TRUE) # has a conflicting function
-}                                     # named map()
 
 # Toy data
 set.seed(1000)
